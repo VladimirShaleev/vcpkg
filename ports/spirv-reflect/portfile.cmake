@@ -8,6 +8,7 @@ vcpkg_from_github(
     HEAD_REF main
     PATCHES
         export-targets.patch
+        install-targets.patch
 )
 
 vcpkg_cmake_configure(

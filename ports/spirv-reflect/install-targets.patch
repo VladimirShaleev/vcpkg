@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 906c208..dd3c54a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -47,7 +47,7 @@ if (SPIRV_REFLECT_EXECUTABLE)
+         target_compile_definitions(spirv-reflect PRIVATE _CRT_SECURE_NO_WARNINGS)
+     endif()
+ 
+-    install(TARGETS spirv-reflect RUNTIME DESTINATION bin)
++    install(TARGETS spirv-reflect RUNTIME DESTINATION bin BUNDLE DESTINATION bin)
+ 
+     # ==========================================================================
+     # Compile spirv_reflect.c as C++
+@@ -75,7 +75,7 @@ if (SPIRV_REFLECT_EXECUTABLE)
+         target_compile_definitions(spirv-reflect-pp PRIVATE _CRT_SECURE_NO_WARNINGS)
+     endif()
+ 
+-    install(TARGETS spirv-reflect-pp RUNTIME DESTINATION bin)
++    install(TARGETS spirv-reflect-pp RUNTIME DESTINATION bin BUNDLE DESTINATION bin)
+ endif()
+ 
+ if (SPIRV_REFLECT_EXAMPLES)
