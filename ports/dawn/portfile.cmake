@@ -2,7 +2,7 @@ if (VCPKG_TARGET_IS_EMSCRIPTEN)
     vcpkg_download_distfile(ARCHIVE
         URLS "https://github.com/google/dawn/releases/download/v${VERSION}/emdawnwebgpu_pkg-v${VERSION}.zip"
         FILENAME "emdawnwebgpu_pkg-v${VERSION}.zip"
-        SHA512 a0544b3bf2d81abee91fb43901d384b021005d4158b43fec996977607f08852b211940a3ca71d37ac8bda52821c361bbaa93d0e4e63f72ff186863ef48a6a3d0
+        SHA512 0
     )
     vcpkg_extract_source_archive(
         SOURCE_PATH
@@ -30,7 +30,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO google/dawn
     REF "v${VERSION}"
-    SHA512 6962d1526ac88d4e00d236b4ae86bd885d67f493d6b7342117e3b658fa6f37bf6d6b8617af4d74ef0bf9e3e95cf91aed567fb0f90bf836ad132dff4a304525f8
+    SHA512 f0b2a614c2a275864e4e78a5ac686f347f7a27b022e796955a9cf6633a30ff3690229c4577458b46ffa31118ed9ec4ec25eddf38de3c6d99f92ef93bf2ee59d4
     HEAD_REF master
     PATCHES
         001-fix-windows-build.patch
@@ -38,7 +38,8 @@ vcpkg_from_github(
         003-fix-d3d11.patch
         004-deps.patch
         005-bsd-support.patch
-        006-fix-x11-include-dirs.patch
+        006-fix-win32-runtime.patch
+        007-fix-webgpu-glfw-target.patch
 )
 
 # vcpkg_find_acquire_program(PYTHON3)
@@ -84,17 +85,24 @@ checkout_in_path(
 checkout_in_path(
     "${SOURCE_PATH}/third_party/spirv-headers/src"
     "https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Headers"
-    "a8637796c28386c3cf3b4e8107020fbb52c46f3f"
+    "f2e4bd213104fe323a01e935df56557328d37ac8"
 )
 
 checkout_in_path(
     "${SOURCE_PATH}/third_party/spirv-tools/src"
     "https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Tools"
-    "f386417185be0601894b20d9ad000aceb73d898b"
+    "05b0ab1253db43c3ea29efd593f3f13dfa621ab1"
+)
+
+checkout_in_path(
+    "${SOURCE_PATH}/third_party/webgpu-headers/src"
+    "https://chromium.googlesource.com/external/github.com/webgpu-native/webgpu-headers"
+    "706853a9da45b8e89b7ea005aa267294d115f8ce"
 )
 
 vcpkg_find_acquire_program(PYTHON3)
 
+string(COMPARE EQUAL "${VCPKG_CRT_LINKAGE}" "dynamic" MSVC_USE_MD)
 if (VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     set(DAWN_BUILD_MONOLITHIC_LIBRARY "STATIC")
 else()
@@ -138,14 +146,20 @@ set(DAWN_USE_X11 OFF)
 if("x11" IN_LIST FEATURES)
     set(DAWN_USE_X11 ON)
 endif()
+set(DAWN_USE_GLFW OFF)
+if("glfw" IN_LIST FEATURES)
+    set(DAWN_USE_GLFW ON)
+endif()
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
         -DPython3_EXECUTABLE="${PYTHON3}"
+        -DDAWN_MSVC_DYNAMIC_RUNTIME=${MSVC_USE_MD}
         -DDAWN_BUILD_MONOLITHIC_LIBRARY=${DAWN_BUILD_MONOLITHIC_LIBRARY}
+        -DDAWN_FORCE_SYSTEM_COMPONENT_LOAD=ON
+        -DDAWN_ENABLE_PIC=ON
         -DDAWN_ENABLE_INSTALL=ON
-        -DDAWN_USE_GLFW=OFF
         -DDAWN_BUILD_PROTOBUF=OFF
         -DDAWN_BUILD_SAMPLES=OFF
         -DDAWN_BUILD_TESTS=OFF
@@ -161,6 +175,9 @@ vcpkg_cmake_configure(
         -DDAWN_ENABLE_VULKAN=${DAWN_ENABLE_VULKAN}
         -DDAWN_USE_WAYLAND=${DAWN_USE_WAYLAND}
         -DDAWN_USE_X11=${DAWN_USE_X11}
+        -DDAWN_USE_GLFW=${DAWN_USE_GLFW}
+    MAYBE_UNUSED_VARIABLES
+        DAWN_MSVC_DYNAMIC_RUNTIME
 )
 
 vcpkg_cmake_install()

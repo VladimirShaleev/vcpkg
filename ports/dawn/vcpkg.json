@@ -1,7 +1,6 @@
 {
   "name": "dawn",
-  "version": "20250922.223923",
-  "port-version": 1,
+  "version": "20251030.221451",
   "description": "Dawn is an open-source and cross-platform implementation of the WebGPU standard.",
   "homepage": "https://dawn.googlesource.com/dawn",
   "license": "BSD-3-Clause",
@@ -47,10 +46,6 @@
     {
       "name": "vulkan",
       "platform": "(windows & !uwp) | android | linux | freebsd | openbsd"
-    },
-    {
-      "name": "x11",
-      "platform": "linux | freebsd | openbsd"
     }
   ],
   "features": {
@@ -97,6 +92,13 @@
     "x11": {
       "description": "X11 support",
       "supports": "linux | freebsd | openbsd"
+    },
+    "glfw": {
+      "description": "GLFW support",
+      "supports": "(windows & !uwp) | linux | freebsd | openbsd | emscripten",
+      "dependencies": [
+        "glfw3"
+      ]
     }
   }
 }

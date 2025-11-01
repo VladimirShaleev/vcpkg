@@ -1,0 +1,59 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2f856b86bf..9a590b3799 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -480,6 +480,9 @@ set(TINT_SPIRV_TOOLS_DIR   ${DAWN_SPIRV_TOOLS_DIR})
+ # Run on all subdirectories
+ ################################################################################
+ find_package(absl CONFIG REQUIRED)
++if(DAWN_USE_GLFW)
++    find_package(glfw3 CONFIG REQUIRED)
++endif()
+ if (DAWN_ENABLE_VULKAN)
+     find_package(VulkanHeaders CONFIG REQUIRED)
+     find_package(VulkanUtilityLibraries CONFIG REQUIRED)
+diff --git a/src/dawn/glfw/CMakeLists.txt b/src/dawn/glfw/CMakeLists.txt
+index f3bca8c5a1..c464bb590a 100644
+--- a/src/dawn/glfw/CMakeLists.txt
++++ b/src/dawn/glfw/CMakeLists.txt
+@@ -45,9 +45,10 @@ else()
+ endif ()
+ 
+ dawn_add_library(
+-  dawn_glfw
++  webgpu_glfw_objects
+   ENABLE_EMSCRIPTEN
+   UTILITY_TARGET dawn_internal_config
++  FORCE_OBJECT
+   HEADERS
+     "${headers}"
+   SOURCES
+@@ -57,9 +58,24 @@ dawn_add_library(
+   PRIVATE_DEPENDS
+     glfw
+ )
+-target_compile_definitions(dawn_glfw PRIVATE "WGPU_GLFW_IMPLEMENTATION")
+-if(BUILD_SHARED_LIBS)
+-    target_compile_definitions(dawn_glfw PUBLIC "WGPU_GLFW_SHARED_LIBRARY")
++target_compile_definitions(webgpu_glfw_objects
++    PRIVATE
++        "WGPU_IMPLEMENTATION"
++        "WGPU_GLFW_IMPLEMENTATION"
++        "DAWN_NATIVE_IMPLEMENTATION"
++)
++if (DAWN_BUILD_MONOLITHIC_LIBRARY STREQUAL SHARED)
++    target_compile_definitions(webgpu_glfw_objects
++        PUBLIC
++            "WGPU_SHARED_LIBRARY"
++            "WGPU_GLFW_SHARED_LIBRARY"
++            "DAWN_NATIVE_SHARED_LIBRARY"
++    )
+ endif()
+ 
+-add_library(webgpu_glfw ALIAS dawn_glfw)
++# Do the bundling of all the objects and dependencies together.
++include(BundleLibraries)
++bundle_libraries(webgpu_glfw ${DAWN_BUILD_MONOLITHIC_LIBRARY} webgpu_glfw_objects)
++if (DAWN_ENABLE_INSTALL)
++    dawn_install_target(webgpu_glfw HEADERS ${headers})
++endif ()

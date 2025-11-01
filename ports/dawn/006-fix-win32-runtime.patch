@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 069f37aeef..2f856b86bf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -41,6 +41,16 @@ project(
+ )
+ enable_testing()
+ 
++if(WIN32)
++  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR MSVC)
++    if(DAWN_MSVC_DYNAMIC_RUNTIME)
++      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
++    else()
++      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
++    endif()
++  endif()
++endif()
++
+ list(INSERT CMAKE_MODULE_PATH 0 "${Dawn_SOURCE_DIR}/src/cmake")
+ 
+ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
